@@ -15,7 +15,7 @@ def get_app_info(filename):
     base = os.path.splitext(filename)[0]
 
     match = re.match(
-        r'^(.*?)[\s._-]?v?(\d+(?:\.\d+)+)$',
+        r'^(.*?)(?:v)?(\d+(?:\.\d+)+)$',
         base,
         re.IGNORECASE
     )
