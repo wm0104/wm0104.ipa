@@ -3,6 +3,7 @@ import re
 import urllib.parse
 
 IPA_FOLDER = './tipa'
+ICON_FOLDER = './icon'
 REPO = 'wm0104/wm0104.ipa'
 HTML_FILE = 'index.html'
 
@@ -33,7 +34,44 @@ def version_tuple(version):
     return tuple(int(x) for x in version.split('.'))
 
 
-with open(HTML_FILE, 'r', encoding='utf-8') as f:
+def normalize_name(name):
+    return re.sub(
+        r'[^a-zA-Z0-9]',
+        '',
+        name
+    ).lower()
+
+
+def find_icon(filename):
+    if not os.path.isdir(ICON_FOLDER):
+        return None
+
+    base = os.path.splitext(filename)[0]
+
+    base_key = normalize_name(base)
+
+    for icon_file in os.listdir(ICON_FOLDER):
+
+        if not icon_file.lower().endswith(
+            ('.png', '.jpg', '.jpeg', '.webp')
+        ):
+            continue
+
+        icon_name = os.path.splitext(icon_file)[0]
+
+        icon_key = normalize_name(icon_name)
+
+        if base_key.startswith(icon_key):
+            return icon_file
+
+    return None
+
+
+with open(
+    HTML_FILE,
+    'r',
+    encoding='utf-8'
+) as f:
     html = f.read()
 
 
@@ -45,10 +83,13 @@ if START_MARKER not in html or END_MARKER not in html:
 
 apps = {}
 
+
 files = [
     fn
     for fn in os.listdir(IPA_FOLDER)
-    if fn.lower().endswith(('.ipa', '.tipa'))
+    if fn.lower().endswith(
+        ('.ipa', '.tipa')
+    )
 ]
 
 
@@ -56,11 +97,7 @@ for fn in files:
 
     name, version = get_app_info(fn)
 
-    key = re.sub(
-        r'[^a-zA-Z0-9]',
-        '',
-        name
-    ).lower()
+    key = normalize_name(name)
 
     if key not in apps:
 
@@ -74,7 +111,9 @@ for fn in files:
 
         old = apps[key]
 
-        if version_tuple(version) > version_tuple(old['version']):
+        if version_tuple(version) > version_tuple(
+            old['version']
+        ):
 
             old_path = os.path.join(
                 IPA_FOLDER,
@@ -82,9 +121,12 @@ for fn in files:
             )
 
             if os.path.exists(old_path):
+
                 os.remove(old_path)
+
                 print(
-                    f"删除旧版本: {old['file']}"
+                    '删除旧版本:',
+                    old['file']
                 )
 
             apps[key] = {
@@ -101,9 +143,12 @@ for fn in files:
             )
 
             if os.path.exists(new_path):
+
                 os.remove(new_path)
+
                 print(
-                    f"删除旧版本: {fn}"
+                    '删除旧版本:',
+                    fn
                 )
 
 
@@ -119,21 +164,51 @@ for app in sorted(
     version = app['version']
     filename = app['file']
 
-    icon_name = re.sub(
-        r'[^a-zA-Z0-9]',
-        '',
-        name
-    ).lower()
+    icon_filename = find_icon(filename)
 
-    icon_url = (
-        f'https://raw.githubusercontent.com/'
-        f'{REPO}/main/icon/{icon_name}.png'
-    )
+
+    if icon_filename:
+
+        safe_icon = urllib.parse.quote(
+            icon_filename,
+            safe=''
+        )
+
+        icon_url = (
+            f'https://raw.githubusercontent.com/'
+            f'{REPO}/main/icon/{safe_icon}'
+        )
+
+        icon_html = f'''
+        <img
+            src="{icon_url}"
+            class="app-icon"
+            alt="{name}"
+        >
+        '''
+
+        print(
+            '图标匹配:',
+            filename,
+            '→',
+            icon_filename
+        )
+
+    else:
+
+        icon_html = ''
+
+        print(
+            '未找到图标:',
+            filename
+        )
+
 
     safe_filename = urllib.parse.quote(
         filename,
         safe=''
     )
+
 
     download_url = (
         f'https://github.com/{REPO}'
@@ -141,24 +216,30 @@ for app in sorted(
         f'tipa/{safe_filename}'
     )
 
+
+    extension = os.path.splitext(
+        filename
+    )[1].replace(
+        '.',
+        ''
+    ).lower()
+
+
     cards += f'''
 <div class="app-item">
 
     <div class="app-meta-box">
 
-        <img
-            src="{icon_url}"
-            class="app-icon"
-            alt="{name}"
-            onerror="this.style.display='none'"
-        >
+        {icon_html}
 
         <div class="app-info">
 
-            <div class="app-name">{name}</div>
+            <div class="app-name">
+                {name}
+            </div>
 
             <div class="app-version">
-                {version} · ipa
+                {version} · {extension}
             </div>
 
             <div class="app-desc">
@@ -178,8 +259,13 @@ for app in sorted(
 '''
 
 
-start = html.index(START_MARKER) + len(START_MARKER)
-end = html.index(END_MARKER)
+start = html.index(
+    START_MARKER
+) + len(START_MARKER)
+
+end = html.index(
+    END_MARKER
+)
 
 
 html = (
@@ -191,7 +277,12 @@ html = (
 )
 
 
-with open(HTML_FILE, 'w', encoding='utf-8') as f:
+with open(
+    HTML_FILE,
+    'w',
+    encoding='utf-8'
+) as f:
+
     f.write(html)
 
 
