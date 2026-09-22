@@ -1,0 +1,68 @@
+name: Auto Update Data JSON
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'ipa/*.ipa'
+      - 'ipa/*.tipa'
+      - 'icons/*.png'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Generate data.json
+        run: |
+          python -c "
+import os, json, urllib.parse
+ipa_folder = './ipa'
+icon_folder = './icons'
+DATA_FILE = './data.json'
+apps = []
+if os.path.exists(DATA_FILE):
+    with open(DATA_FILE, 'r', encoding='utf-8') as f:
+        apps = json.load(f)
+for filename in os.listdir(ipa_folder):
+    if filename.endswith('.ipa') or filename.endswith('.tipa'):
+        base_name = os.path.splitext(filename)[0]
+        app_name = base_name.split('-')[0].strip()
+        version = base_name.split('-')[1].strip() if '-' in base_name else 'v1.0'
+        if any(app['name'].lower() == app_name.lower() for app in apps):
+            continue
+        icon_filename = app_name + '.png'
+        icon_url = 'https://raw.githubusercontent.com/wm0104/wm0104.icon/main/APP/' + urllib.parse.quote(icon_filename)
+        safe_filename = urllib.parse.quote(filename)
+        download_url = 'https://raw.githubusercontent.com/wm0104/wm0104.ipa/main/ipa/' + safe_filename
+        apps.append({
+            'name': app_name,
+            'version': version,
+            'type': 'ipa' if filename.endswith('.ipa') else 'tipa',
+            'description': '自动添加，请在 data.json 中修改描述',
+            'icon': icon_url,
+            'download': download_url
+        })
+with open(DATA_FILE, 'w', encoding='utf-8') as f:
+    json.dump(apps, f, indent=2, ensure_ascii=False)
+print(f'生成完成，共 {len(apps)} 个应用')
+"
+          
+      - name: Commit and Push
+        run: |
+          git config --global user.email 'action@github.com'
+          git config --global user.name 'GitHub Action'
+          git add data.json
+          if ! git diff --staged --exit-code; then
+            git commit -m 'Auto update data.json'
+            git push
+          fi
