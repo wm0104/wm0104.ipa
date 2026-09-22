@@ -3,10 +3,7 @@ name: Auto Update Repo Page
 on:
   push:
     branches: [ main ]
-    paths:
-      - 'tipa/*.ipa'
-      - 'tipa/*.tipa'
-      - 'icon/*.png'
+  workflow_dispatch:
 
 jobs:
   update:
@@ -32,7 +29,7 @@ with open(HTML_FILE, 'r', encoding='utf-8') as f:
     html = f.read()
 
 if MARKER not in html:
-    print('Error: marker not found')
+    print('Error: 找不到标记，请检查 index.html 里有没有 <!-- AUTO_INSERT_HERE -->')
     exit(1)
 
 cards = ''
@@ -69,4 +66,3 @@ print('Done!')
             git commit -m 'Auto update app list'
             git push
           fi
- 
