@@ -1,69 +1,33 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8"/>
-    <title>wm0104's Repo</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background-color: #f5f5f7;
-            color: #1d1d1f;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        .bg-fluid {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
-            background-color: #f5f5f7;
-            background-image:
-                radial-gradient(at 0% 0%, #d2e3fc 0px, transparent 60%),
-                radial-gradient(at 50% 0%, #f3e8ff 0px, transparent 60%),
-                radial-gradient(at 100% 0%, #e3f2fd 0px, transparent 60%);
-        }
-        .main-container {
-            position: relative; padding: 40px 24px; border-radius: 35px; width: 100%; max-width: 420px;
-            background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(30px) saturate(180%); -webkit-backdrop-filter: blur(30px) saturate(180%);
-        }
-        .header-box { display: flex; align-items: center; justify-content: center; margin-bottom: 24px; }
-        .avatar { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.6); margin-right: 16px; }
-        .title-container { text-align: left; display: flex; flex-direction: column; }
-        .top-title { font-size: 28px; font-weight: 800; color: #1d1d1f; }
-        .repo-subtitle { font-size: 14px; font-weight: 600; color: #86868b; margin-top: 2px; }
-        .app-list-section { border-top: 1px solid rgba(0, 0, 0, 0.1); padding-top: 25px; text-align: left; }
-        .list-title { font-size: 15px; font-weight: 700; color: #86868b; margin-bottom: 20px; padding-left: 4px; text-transform: uppercase; }
-        .app-item { display: flex; align-items: center; justify-content: space-between; padding-bottom: 18px; border-bottom: 1px solid rgba(0, 0, 0, 0.06); margin-bottom: 18px; }
-        .app-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .app-meta-box { display: flex; align-items: center; flex: 1; min-width: 0; margin-right: 12px; }
-        .app-info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-        .app-name { font-size: 15px; font-weight: 700; color: #1d1d1f; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .app-version { font-size: 12px; color: #86868b; margin-bottom: 2px; }
-        .app-desc { font-size: 12px; color: #a1a1a6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .download-btn { background: rgba(0, 0, 0, 0.05); color: #0071e3; text-decoration: none; padding: 6px 18px; border-radius: 20px; font-size: 13px; font-weight: 700; transition: all 0.2s ease; white-space: nowrap; }
-        .download-btn:hover { background: #0071e3; color: #ffffff; }
-        .footer { margin-top: 28px; color: #777; font-size: 12px; text-align: center; }
-    </style>
-</head>
-<body>
-    <div class="bg-fluid"></div>
-    <div class="main-container">
-        <div class="header-box">
-            <!-- 顶部头像：保留，永远显示 icon/avatar.png -->
-            <img src="https://raw.githubusercontent.com/wm0104/wm0104.ipa/main/icon/avatar.png" class="avatar" alt="Avatar">
-            <div class="title-container">
-                <h1 class="top-title">wm0104</h1>
-                <p class="repo-subtitle">应用仓库</p>
-            </div>
-        </div>
-        <div class="app-list-section">
-            <h2 class="list-title">应用列表</h2>
-            <!-- AUTO_INSERT_HERE -->
-        </div>
-        <div class="footer">wm0104 repo</div>
-    </div>
-</body>
-</html>
+import os
+import urllib.parse
+
+IPA_FOLDER = './tipa'
+REPO = 'wm0104/wm0104.ipa'
+HTML_FILE = 'index.html'
+MARKER = '<!-- AUTO_INSERT_HERE -->'
+
+with open(HTML_FILE, 'r', encoding='utf-8') as f:
+    html = f.read()
+
+if MARKER not in html:
+    print('Error: 找不到标记，请检查 index.html 里有没有 <!-- AUTO_INSERT_HERE -->')
+    exit(1)
+
+cards = ''
+for fn in os.listdir(IPA_FOLDER):
+    if fn.endswith('.ipa') or fn.endswith('.tipa'):
+        base = os.path.splitext(fn)[0]
+        parts = base.split('-')
+        name = parts[0].strip()
+        ver = parts[1].strip() if len(parts) > 1 else 'v1.0'
+        typ = 'ipa' if fn.endswith('.ipa') else 'tipa'
+
+        safe = urllib.parse.quote(fn)
+        down = f'https://raw.githubusercontent.com/{REPO}/main/tipa/{safe}'
+
+        cards += f'<div class="app-item"><div class="app-meta-box"><div class="app-info"><div class="app-name">{name}</div><div class="app-version">{ver} · {typ}</div><div class="app-desc">点击下载安装</div></div></div><a href="{down}" class="download-btn">下载</a></div>'
+
+html = html.replace(MARKER, cards)
+with open(HTML_FILE, 'w', encoding='utf-8') as f:
+    f.write(html)
+print('Done!')
