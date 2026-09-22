@@ -23,8 +23,8 @@ for fn in os.listdir(IPA_FOLDER):
         ver = parts[1].strip() if len(parts) > 1 else 'v1.0'
         typ = 'ipa' if fn.endswith('.ipa') else 'tipa'
 
-        # ⭐ 核心逻辑：用前缀匹配找图标
-        # 例如 IPA 名为 Loon_3.5.1(TF980)_酷卡，图标文件只要叫 Loon.png 就能匹配上
+           # ⭐ 核心逻辑：用前缀匹配找图标，且忽略大小写
+        # 例如 IPA 名为 Loon，图标文件叫 loon.png 或 LOON.png 都能匹配上
         icon_filename = None
         for f in os.listdir(ICON_FOLDER):
             if f.lower().endswith('.png') and name.lower().startswith(f[:-4].lower()):
