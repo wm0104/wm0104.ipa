@@ -14,9 +14,11 @@ if MARKER not in html:
     exit(1)
 
 cards = ''
+
 for fn in os.listdir(IPA_FOLDER):
-    if fn.endswith('.ipa') or fn.endswith('.tipa'):
+    if fn.endswith('.ipa'):
         base = os.path.splitext(fn)[0]
+
         if '-' in base:
             parts = base.split('-', 1)
             name = parts[0].strip()
@@ -29,15 +31,15 @@ for fn in os.listdir(IPA_FOLDER):
             name = base
             ver = 'v1.0'
 
-        typ = 'ipa' if fn.endswith('.ipa') else 'tipa'
         safe_name = urllib.parse.quote(fn)
 
-        # ⭐ 关键改动：用 github.com/.../raw/... 代替 raw.githubusercontent.com/...
         down = f'https://github.com/{REPO}/raw/main/tipa/{safe_name}'
 
-        cards += f'<div class="app-item"><div class="app-meta-box"><div class="app-info"><div class="app-name">{name}</div><div class="app-version">{ver} · {typ}</div><div class="app-desc">点击下载安装</div></div></div><a href="{down}" class="download-btn">下载</a></div>'
+        cards += f'<div class="app-item"><div class="app-meta-box"><div class="app-info"><div class="app-name">{name}</div><div class="app-version">{ver} · ipa</div><div class="app-desc">点击下载安装</div></div></div><a href="{down}" class="download-btn">下载</a></div>'
 
 html = html.replace(MARKER, cards)
+
 with open(HTML_FILE, 'w', encoding='utf-8') as f:
     f.write(html)
+
 print('Done!')
