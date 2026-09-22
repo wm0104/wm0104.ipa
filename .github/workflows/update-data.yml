@@ -24,13 +24,8 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
           path: './repo-page'
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: Run update script
-        run: python update_repo.py
+      - name: Run build script
+        run: bash build_html.sh
 
       - name: Commit and Push
         run: |
