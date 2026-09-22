@@ -1,4 +1,4 @@
-name: Auto Update Repo Page
+name: Auto Update Repo Page 1
 
 on:
   push:
