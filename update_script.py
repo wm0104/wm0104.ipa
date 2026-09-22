@@ -10,16 +10,22 @@ with open(HTML_FILE, 'r', encoding='utf-8') as f:
     html = f.read()
 
 if MARKER not in html:
-    print('Error: 找不到标记，请检查 index.html 里有没有 <!-- AUTO_INSERT_HERE -->')
+    print('Error: 找不到标记')
     exit(1)
 
 cards = ''
 for fn in os.listdir(IPA_FOLDER):
     if fn.endswith('.ipa') or fn.endswith('.tipa'):
         base = os.path.splitext(fn)[0]
-        parts = base.split('-')
-        name = parts[0].strip()
-        ver = parts[1].strip() if len(parts) > 1 else 'v1.0'
+      
+        if '.' in base:
+            parts = base.rsplit('.', 1)
+            name = parts[0].strip()
+            ver = parts[1].strip()
+        else:
+            name = base
+            ver = 'v1.0'
+
         typ = 'ipa' if fn.endswith('.ipa') else 'tipa'
 
         safe = urllib.parse.quote(fn)
