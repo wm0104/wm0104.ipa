@@ -1,7 +1,11 @@
-name: Auto Update Repo Page 
+name: Auto Update Repo Page
+
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'surge/*.ipa'
+      - 'surge/*.tipa'
 
 jobs:
   update:
@@ -19,6 +23,11 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
           path: './repo-page'
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
       - name: Generate and Insert HTML
         run: |
           python -c "
@@ -35,7 +44,7 @@ with open(HTML_FILE, 'r', encoding='utf-8') as f:
     html_content = f.read()
 
 if MARKER not in html_content:
-    print('错误：找不到标记')
+    print('Error: marker not found')
     exit(1)
 
 apps_html = ''
@@ -69,7 +78,7 @@ for filename in os.listdir(IPA_FOLDER):
 new_html = html_content.replace(MARKER, apps_html)
 with open(HTML_FILE, 'w', encoding='utf-8') as f:
     f.write(new_html)
-print('更新完成')
+print('OK')
 "
 
       - name: Commit and Push
