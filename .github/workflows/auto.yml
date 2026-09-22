@@ -69,3 +69,4 @@ print('Done!')
             git commit -m 'Auto update app list'
             git push
           fi
+ 
