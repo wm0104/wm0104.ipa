@@ -1,5 +1,4 @@
 import os
-import re
 import urllib.parse
 
 IPA_FOLDER = './tipa'
@@ -12,33 +11,14 @@ END_MARKER = '<!-- AUTO_END -->'
 
 
 def get_app_info(filename):
-    base = os.path.splitext(filename)[0]
-
-    match = re.match(
-        r'^(.*?)(?:v)?(\d+(?:\.\d+)+)$',
-        base,
-        re.IGNORECASE
-    )
-
-    if match:
-        name = match.group(1).strip()
-        version = match.group(2).strip()
-    else:
-        name = base
-        version = '1.0'
-
-    return name, version
-
-
-def version_tuple(version):
-    return tuple(int(x) for x in version.split('.'))
+    name = os.path.splitext(filename)[0]
+    return name
 
 
 def normalize_name(name):
-    return re.sub(
-        r'[^a-zA-Z0-9]',
-        '',
-        name
+    return ''.join(
+        c for c in name
+        if c.isalnum()
     ).lower()
 
 
@@ -47,7 +27,6 @@ def find_icon(filename):
         return None
 
     base = os.path.splitext(filename)[0]
-
     base_key = normalize_name(base)
 
     for icon_file in os.listdir(ICON_FOLDER):
@@ -58,7 +37,6 @@ def find_icon(filename):
             continue
 
         icon_name = os.path.splitext(icon_file)[0]
-
         icon_key = normalize_name(icon_name)
 
         if base_key.startswith(icon_key):
@@ -83,7 +61,6 @@ if START_MARKER not in html or END_MARKER not in html:
 
 apps = {}
 
-
 files = [
     fn
     for fn in os.listdir(IPA_FOLDER)
@@ -95,61 +72,14 @@ files = [
 
 for fn in files:
 
-    name, version = get_app_info(fn)
+    name = get_app_info(fn)
 
     key = normalize_name(name)
 
-    if key not in apps:
-
-        apps[key] = {
-            'name': name,
-            'version': version,
-            'file': fn
-        }
-
-    else:
-
-        old = apps[key]
-
-        if version_tuple(version) > version_tuple(
-            old['version']
-        ):
-
-            old_path = os.path.join(
-                IPA_FOLDER,
-                old['file']
-            )
-
-            if os.path.exists(old_path):
-
-                os.remove(old_path)
-
-                print(
-                    '删除旧版本:',
-                    old['file']
-                )
-
-            apps[key] = {
-                'name': name,
-                'version': version,
-                'file': fn
-            }
-
-        else:
-
-            new_path = os.path.join(
-                IPA_FOLDER,
-                fn
-            )
-
-            if os.path.exists(new_path):
-
-                os.remove(new_path)
-
-                print(
-                    '删除旧版本:',
-                    fn
-                )
+    apps[key] = {
+        'name': name,
+        'file': fn
+    }
 
 
 cards = ''
@@ -161,11 +91,9 @@ for app in sorted(
 ):
 
     name = app['name']
-    version = app['version']
     filename = app['file']
 
     icon_filename = find_icon(filename)
-
 
     if icon_filename:
 
@@ -187,21 +115,9 @@ for app in sorted(
         >
         '''
 
-        print(
-            '图标匹配:',
-            filename,
-            '→',
-            icon_filename
-        )
-
     else:
 
         icon_html = ''
-
-        print(
-            '未找到图标:',
-            filename
-        )
 
 
     safe_filename = urllib.parse.quote(
@@ -239,7 +155,7 @@ for app in sorted(
             </div>
 
             <div class="app-version">
-                {version} · {extension}
+                {extension}
             </div>
 
             <div class="app-desc">
@@ -284,10 +200,3 @@ with open(
 ) as f:
 
     f.write(html)
-
-
-print()
-print('======================')
-print('更新完成')
-print('当前应用数量:', len(apps))
-print('======================')
