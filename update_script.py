@@ -21,7 +21,7 @@ def get_app_info(filename):
 
     if match:
         name = match.group(1).strip()
-        version = match.group(2)
+        version = match.group(2).strip()
     else:
         name = base
         version = '1.0'
@@ -37,10 +37,17 @@ with open(HTML_FILE, 'r', encoding='utf-8') as f:
     html = f.read()
 
 
+if START_MARKER not in html or END_MARKER not in html:
+    raise SystemExit(
+        'index.html 中找不到 AUTO_START 或 AUTO_END'
+    )
+
+
 apps = {}
 
 files = [
-    fn for fn in os.listdir(IPA_FOLDER)
+    fn
+    for fn in os.listdir(IPA_FOLDER)
     if fn.lower().endswith(('.ipa', '.tipa'))
 ]
 
@@ -76,7 +83,9 @@ for fn in files:
 
             if os.path.exists(old_path):
                 os.remove(old_path)
-                print('删除旧版本:', old['file'])
+                print(
+                    f"删除旧版本: {old['file']}"
+                )
 
             apps[key] = {
                 'name': name,
@@ -93,10 +102,13 @@ for fn in files:
 
             if os.path.exists(new_path):
                 os.remove(new_path)
-                print('删除旧版本:', fn)
+                print(
+                    f"删除旧版本: {fn}"
+                )
 
 
 cards = ''
+
 
 for app in sorted(
     apps.values(),
@@ -124,12 +136,14 @@ for app in sorted(
     )
 
     download_url = (
-        f'https://raw.githubusercontent.com/'
-        f'{REPO}/main/tipa/{safe_filename}'
+        f'https://github.com/{REPO}'
+        f'/raw/refs/heads/main/'
+        f'tipa/{safe_filename}'
     )
 
     cards += f'''
 <div class="app-item">
+
     <div class="app-meta-box">
 
         <img
@@ -140,9 +154,17 @@ for app in sorted(
         >
 
         <div class="app-info">
+
             <div class="app-name">{name}</div>
-            <div class="app-version">{version} · ipa</div>
-            <div class="app-desc">点击下载安装</div>
+
+            <div class="app-version">
+                {version} · ipa
+            </div>
+
+            <div class="app-desc">
+                点击下载安装
+            </div>
+
         </div>
 
     </div>
@@ -156,36 +178,17 @@ for app in sorted(
 '''
 
 
-if START_MARKER in html and END_MARKER in html:
+start = html.index(START_MARKER) + len(START_MARKER)
+end = html.index(END_MARKER)
 
-    start = html.index(START_MARKER) + len(START_MARKER)
-    end = html.index(END_MARKER)
 
-    html = (
-        html[:start]
-        + '\n'
-        + cards
-        + '\n'
-        + html[end:]
-    )
-
-else:
-
-    marker = '<!-- AUTO_INSERT_HERE -->'
-
-    if marker not in html:
-        raise SystemExit(
-            'index.html 中找不到 AUTO_INSERT_HERE'
-        )
-
-    html = html.replace(
-        marker,
-        START_MARKER
-        + '\n'
-        + cards
-        + '\n'
-        + END_MARKER
-    )
+html = (
+    html[:start]
+    + '\n'
+    + cards
+    + '\n'
+    + html[end:]
+)
 
 
 with open(HTML_FILE, 'w', encoding='utf-8') as f:
