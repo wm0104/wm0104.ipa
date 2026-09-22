@@ -17,7 +17,7 @@ if MARKER not in html:
 cards = ''
 
 for fn in sorted(os.listdir(IPA_FOLDER)):
-    if not fn.lower().endswith('.ipa'):
+    if not (fn.lower().endswith('.ipa') or fn.lower().endswith('.tipa')):
         continue
 
     base = os.path.splitext(fn)[0]
@@ -58,7 +58,7 @@ for fn in sorted(os.listdir(IPA_FOLDER)):
 </div>
 '''
 
-html = html.replace(MARKER, cards)
+html = html.replace(MARKER, cards + '\n' + MARKER)
 
 with open(HTML_FILE, 'w', encoding='utf-8') as f:
     f.write(html)
