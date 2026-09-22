@@ -5,6 +5,7 @@
     <title>wm0104's Repo</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
             background-color: #f5f5f7;
             color: #1d1d1f;
@@ -15,55 +16,201 @@
             align-items: center;
             padding: 20px;
         }
+
         .bg-fluid {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
             background-color: #f5f5f7;
             background-image:
                 radial-gradient(at 0% 0%, #d2e3fc 0px, transparent 60%),
                 radial-gradient(at 50% 0%, #f3e8ff 0px, transparent 60%),
                 radial-gradient(at 100% 0%, #e3f2fd 0px, transparent 60%);
         }
+
         .main-container {
-            position: relative; padding: 40px 24px; border-radius: 35px; width: 100%; max-width: 420px;
-            background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(30px) saturate(180%); -webkit-backdrop-filter: blur(30px) saturate(180%);
+            position: relative;
+            padding: 40px 24px;
+            border-radius: 35px;
+            width: 100%;
+            max-width: 420px;
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow:
+                0 30px 60px rgba(0, 0, 0, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
         }
-        .header-box { display: flex; align-items: center; justify-content: center; margin-bottom: 24px; }
-        .avatar { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.6); margin-right: 16px; }
-        .title-container { text-align: left; display: flex; flex-direction: column; }
-        .top-title { font-size: 28px; font-weight: 800; color: #1d1d1f; }
-        .repo-subtitle { font-size: 14px; font-weight: 600; color: #86868b; margin-top: 2px; }
-        .app-list-section { border-top: 1px solid rgba(0, 0, 0, 0.1); padding-top: 25px; text-align: left; }
-        .list-title { font-size: 15px; font-weight: 700; color: #86868b; margin-bottom: 20px; padding-left: 4px; text-transform: uppercase; }
-        .app-item { display: flex; align-items: center; justify-content: space-between; padding-bottom: 18px; border-bottom: 1px solid rgba(0, 0, 0, 0.06); margin-bottom: 18px; }
-        .app-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .app-meta-box { display: flex; align-items: center; flex: 1; min-width: 0; margin-right: 12px; }
-        .app-info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-        .app-name { font-size: 15px; font-weight: 700; color: #1d1d1f; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .app-version { font-size: 12px; color: #86868b; margin-bottom: 2px; }
-        .app-desc { font-size: 12px; color: #a1a1a6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .download-btn { background: rgba(0, 0, 0, 0.05); color: #0071e3; text-decoration: none; padding: 6px 18px; border-radius: 20px; font-size: 13px; font-weight: 700; transition: all 0.2s ease; white-space: nowrap; }
-        .download-btn:hover { background: #0071e3; color: #ffffff; }
-        .footer { margin-top: 28px; color: #777; font-size: 12px; text-align: center; }
+
+        .header-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            margin-right: 16px;
+        }
+
+        .title-container {
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1d1d1f;
+        }
+
+        .repo-subtitle {
+            font-size: 14px;
+            font-weight: 600;
+            color: #86868b;
+            margin-top: 2px;
+        }
+
+        .app-list-section {
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            padding-top: 25px;
+            text-align: left;
+        }
+
+        .list-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #86868b;
+            margin-bottom: 20px;
+            padding-left: 4px;
+            text-transform: uppercase;
+        }
+
+        .app-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 18px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            margin-bottom: 18px;
+        }
+
+        .app-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .app-meta-box {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            min-width: 0;
+            margin-right: 12px;
+        }
+
+        .app-info {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1d1d1f;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .app-version {
+            font-size: 12px;
+            color: #86868b;
+            margin-bottom: 2px;
+        }
+
+        .app-desc {
+            font-size: 12px;
+            color: #a1a1a6;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .download-btn {
+            background: rgba(0, 0, 0, 0.05);
+            color: #0071e3;
+            text-decoration: none;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .download-btn:hover {
+            background: #0071e3;
+            color: #ffffff;
+        }
+
+        .footer {
+            margin-top: 28px;
+            color: #777;
+            font-size: 12px;
+            text-align: center;
+        }
     </style>
 </head>
+
 <body>
+
     <div class="bg-fluid"></div>
+
     <div class="main-container">
+
         <div class="header-box">
+
             <!-- 顶部头像：保留，永远显示 icon/avatar.png -->
-            <img src="https://raw.githubusercontent.com/wm0104/wm0104.ipa/main/icon/avatar.png" class="avatar" alt="Avatar">
+            <img
+                src="https://raw.githubusercontent.com/wm0104/wm0104.ipa/main/icon/avatar.png"
+                class="avatar"
+                alt="Avatar"
+            >
+
             <div class="title-container">
                 <h1 class="top-title">wm0104</h1>
                 <p class="repo-subtitle">应用仓库</p>
             </div>
+
         </div>
+
         <div class="app-list-section">
+
             <h2 class="list-title">应用列表</h2>
-            <div class="app-item"><div class="app-meta-box"><div class="app-info"><div class="app-name">Loon3.5.1</div><div class="app-version">v1.0 · ipa</div><div class="app-desc">点击下载安装</div></div></div><a href="https://raw.githubusercontent.com/wm0104/wm0104.ipa/main/tipa/Loon3.5.1.ipa" class="download-btn">下载</a></div><div class="app-item"><div class="app-meta-box"><div class="app-info"><div class="app-name">Surge5.20.0</div><div class="app-version">v1.0 · tipa</div><div class="app-desc">点击下载安装</div></div></div><a href="https://raw.githubusercontent.com/wm0104/wm0104.ipa/main/tipa/Surge5.20.0.tipa" class="download-btn">下载</a></div>
+
+            <!-- AUTO_INSERT_HERE -->
+
         </div>
-        <div class="footer">wm0104 repo</div>
+
+        <div class="footer">
+            wm0104 repo
+        </div>
+
     </div>
+
 </body>
 </html>
