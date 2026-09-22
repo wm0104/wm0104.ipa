@@ -17,8 +17,11 @@ cards = ''
 for fn in os.listdir(IPA_FOLDER):
     if fn.endswith('.ipa') or fn.endswith('.tipa'):
         base = os.path.splitext(fn)[0]
-      
-        if '.' in base:
+        if '-' in base:
+            parts = base.split('-', 1)
+            name = parts[0].strip()
+            ver = parts[1].strip()
+        elif '.' in base:
             parts = base.rsplit('.', 1)
             name = parts[0].strip()
             ver = parts[1].strip()
@@ -27,9 +30,10 @@ for fn in os.listdir(IPA_FOLDER):
             ver = 'v1.0'
 
         typ = 'ipa' if fn.endswith('.ipa') else 'tipa'
+        safe_name = urllib.parse.quote(fn)
 
-        safe = urllib.parse.quote(fn)
-        down = f'https://raw.githubusercontent.com/{REPO}/main/tipa/{safe}'
+        # ⭐ 关键改动：用 github.com/.../raw/... 代替 raw.githubusercontent.com/...
+        down = f'https://github.com/{REPO}/raw/main/tipa/{safe_name}'
 
         cards += f'<div class="app-item"><div class="app-meta-box"><div class="app-info"><div class="app-name">{name}</div><div class="app-version">{ver} · {typ}</div><div class="app-desc">点击下载安装</div></div></div><a href="{down}" class="download-btn">下载</a></div>'
 
