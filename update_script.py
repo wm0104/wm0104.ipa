@@ -23,13 +23,16 @@ for fn in os.listdir(IPA_FOLDER):
         ver = parts[1].strip() if len(parts) > 1 else 'v1.0'
         typ = 'ipa' if fn.endswith('.ipa') else 'tipa'
 
-        icon_filename = base + '.png' 
-        icon_path = os.path.join(ICON_FOLDER, icon_filename)
-        if os.path.exists(icon_path):
-            icon_url = f'https://raw.githubusercontent.com/{REPO}/main/icon/{urllib.parse.quote(icon_filename)}'
-            icon_html = f'<a href="{icon_url}" class="app-icon-link"><img src="{icon_url}" class="app-icon"></a>'
-        else:
-            icon_html = ''
+        # ⭐ 核心：遍历 icon 文件夹，找出文件名是"app名字前缀"的 png 图片
+        # 比如 IPA 叫 Loon_3.5.1，图标叫 Loon.png 或 loon.png 都能匹配上
+        icon_filename = None
+        for f in os.listdir(ICON_FOLDER):
+            # 只要图标的后缀是 .png（大小写不敏感），且 IPA 名以图标名开头（大小写不敏感）
+            if f.lower().endswith('.png'):
+                icon_name_prefix = f[:-4].lower()  # 去掉 .png 后缀，转小写
+                if name.lower().startswith(icon_name_prefix):
+                    icon_filename = f
+                    break
 
         if icon_filename:
             icon_url = f'https://raw.githubusercontent.com/{REPO}/main/icon/{urllib.parse.quote(icon_filename)}'
