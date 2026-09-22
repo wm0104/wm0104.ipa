@@ -1,5 +1,6 @@
 import os
 import urllib.parse
+import re
 
 IPA_FOLDER = './tipa'
 REPO = 'wm0104/wm0104.ipa'
@@ -15,27 +16,47 @@ if MARKER not in html:
 
 cards = ''
 
-for fn in os.listdir(IPA_FOLDER):
-    if fn.endswith('.ipa'):
-        base = os.path.splitext(fn)[0]
+for fn in sorted(os.listdir(IPA_FOLDER)):
+    if not fn.lower().endswith('.ipa'):
+        continue
 
-        if '-' in base:
-            parts = base.split('-', 1)
-            name = parts[0].strip()
-            ver = parts[1].strip()
-        elif '.' in base:
-            parts = base.rsplit('.', 1)
-            name = parts[0].strip()
-            ver = parts[1].strip()
-        else:
-            name = base
-            ver = 'v1.0'
+    base = os.path.splitext(fn)[0]
 
-        safe_name = urllib.parse.quote(fn)
+    match = re.match(r'^(.*?)[\s._-]?v?(\d+(?:\.\d+)+)$', base, re.IGNORECASE)
 
-        down = f'https://github.com/{REPO}/raw/main/tipa/{safe_name}'
+    if match:
+        name = match.group(1).strip()
+        ver = match.group(2).strip()
+    else:
+        name = base
+        ver = 'v1.0'
 
-        cards += f'<div class="app-item"><div class="app-meta-box"><div class="app-info"><div class="app-name">{name}</div><div class="app-version">{ver} · ipa</div><div class="app-desc">点击下载安装</div></div></div><a href="{down}" class="download-btn">下载</a></div>'
+    icon_name = re.sub(r'[^a-zA-Z0-9]', '', name).lower()
+
+    icon_url = f'https://raw.githubusercontent.com/{REPO}/main/icon/{icon_name}.png'
+
+    safe_name = urllib.parse.quote(fn)
+
+    down = f'https://raw.githubusercontent.com/{REPO}/main/tipa/{safe_name}'
+
+    cards += f'''
+<div class="app-item">
+    <div class="app-meta-box">
+        <img
+            src="{icon_url}"
+            class="app-icon"
+            alt="{name}"
+            onerror="this.style.display='none'"
+        >
+        <div class="app-info">
+            <div class="app-name">{name}</div>
+            <div class="app-version">{ver} · ipa</div>
+            <div class="app-desc">点击下载安装</div>
+        </div>
+    </div>
+    <a href="{down}" class="download-btn">下载</a>
+</div>
+'''
 
 html = html.replace(MARKER, cards)
 
