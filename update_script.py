@@ -5,15 +5,9 @@ import urllib.parse
 IPA_FOLDER = './tipa'
 REPO = 'wm0104/wm0104.ipa'
 HTML_FILE = 'index.html'
-MARKER = '<!-- AUTO_INSERT_HERE -->'
 
-with open(HTML_FILE, 'r', encoding='utf-8') as f:
-    html = f.read()
-
-if MARKER not in html:
-    raise SystemExit(
-        f"未找到标记 {MARKER!r}，请在 {HTML_FILE} 中添加该标记"
-    )
+START_MARKER = '<!-- AUTO_START -->'
+END_MARKER = '<!-- AUTO_END -->'
 
 
 def get_app_info(filename):
@@ -27,7 +21,7 @@ def get_app_info(filename):
 
     if match:
         name = match.group(1).strip()
-        version = match.group(2).strip()
+        version = match.group(2)
     else:
         name = base
         version = '1.0'
@@ -39,15 +33,19 @@ def version_tuple(version):
     return tuple(int(x) for x in version.split('.'))
 
 
+with open(HTML_FILE, 'r', encoding='utf-8') as f:
+    html = f.read()
+
+
 apps = {}
 
-for fn in os.listdir(IPA_FOLDER):
+files = [
+    fn for fn in os.listdir(IPA_FOLDER)
+    if fn.lower().endswith(('.ipa', '.tipa'))
+]
 
-    if not (
-        fn.lower().endswith('.ipa')
-        or fn.lower().endswith('.tipa')
-    ):
-        continue
+
+for fn in files:
 
     name, version = get_app_info(fn)
 
@@ -67,19 +65,18 @@ for fn in os.listdir(IPA_FOLDER):
 
     else:
 
-        old_version = apps[key]['version']
+        old = apps[key]
 
-        if version_tuple(version) > version_tuple(old_version):
+        if version_tuple(version) > version_tuple(old['version']):
 
-            old_file = apps[key]['file']
             old_path = os.path.join(
                 IPA_FOLDER,
-                old_file
+                old['file']
             )
 
             if os.path.exists(old_path):
                 os.remove(old_path)
-                print(f'删除旧版本: {old_file}')
+                print('删除旧版本:', old['file'])
 
             apps[key] = {
                 'name': name,
@@ -89,14 +86,14 @@ for fn in os.listdir(IPA_FOLDER):
 
         else:
 
-            old_path = os.path.join(
+            new_path = os.path.join(
                 IPA_FOLDER,
                 fn
             )
 
-            if os.path.exists(old_path):
-                os.remove(old_path)
-                print(f'删除旧版本: {fn}')
+            if os.path.exists(new_path):
+                os.remove(new_path)
+                print('删除旧版本:', fn)
 
 
 cards = ''
@@ -134,6 +131,7 @@ for app in sorted(
     cards += f'''
 <div class="app-item">
     <div class="app-meta-box">
+
         <img
             src="{icon_url}"
             class="app-icon"
@@ -146,31 +144,56 @@ for app in sorted(
             <div class="app-version">{version} · ipa</div>
             <div class="app-desc">点击下载安装</div>
         </div>
+
     </div>
 
     <a
         href="{download_url}"
         class="download-btn"
-        download
     >下载</a>
+
 </div>
 '''
 
 
-start = html.index(MARKER)
+if START_MARKER in html and END_MARKER in html:
 
-html = (
-    html[:start]
-    + cards
-    + '\n'
-    + MARKER
-    + html[start + len(MARKER):]
-)
+    start = html.index(START_MARKER) + len(START_MARKER)
+    end = html.index(END_MARKER)
+
+    html = (
+        html[:start]
+        + '\n'
+        + cards
+        + '\n'
+        + html[end:]
+    )
+
+else:
+
+    marker = '<!-- AUTO_INSERT_HERE -->'
+
+    if marker not in html:
+        raise SystemExit(
+            'index.html 中找不到 AUTO_INSERT_HERE'
+        )
+
+    html = html.replace(
+        marker,
+        START_MARKER
+        + '\n'
+        + cards
+        + '\n'
+        + END_MARKER
+    )
 
 
 with open(HTML_FILE, 'w', encoding='utf-8') as f:
     f.write(html)
 
 
-print('Done!')
-print(f'当前网页应用数量: {len(apps)}')
+print()
+print('======================')
+print('更新完成')
+print('当前应用数量:', len(apps))
+print('======================')
