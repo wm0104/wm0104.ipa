@@ -11,7 +11,7 @@ with open(HTML_FILE, 'r', encoding='utf-8') as f:
     html = f.read()
 
 if MARKER not in html:
-    print('Error: marker not found')
+    print('Error: 找不到标记，请检查 index.html 里有没有 <!-- AUTO_INSERT_HERE -->')
     exit(1)
 
 cards = ''
@@ -23,9 +23,15 @@ for fn in os.listdir(IPA_FOLDER):
         ver = parts[1].strip() if len(parts) > 1 else 'v1.0'
         typ = 'ipa' if fn.endswith('.ipa') else 'tipa'
 
-        icon_filename = name + '.png'
-        icon_path = os.path.join(ICON_FOLDER, icon_filename)
-        if os.path.exists(icon_path):
+        # ⭐ 核心逻辑：用前缀匹配找图标
+        # 例如 IPA 名为 Loon_3.5.1(TF980)_酷卡，图标文件只要叫 Loon.png 就能匹配上
+        icon_filename = None
+        for f in os.listdir(ICON_FOLDER):
+            if f.lower().endswith('.png') and name.lower().startswith(f[:-4].lower()):
+                icon_filename = f
+                break
+
+        if icon_filename:
             icon_url = f'https://raw.githubusercontent.com/{REPO}/main/icon/{urllib.parse.quote(icon_filename)}'
             icon_html = f'<a href="{icon_url}" class="app-icon-link"><img src="{icon_url}" class="app-icon"></a>'
         else:
