@@ -1,0 +1,49 @@
+import os
+import urllib.parse
+
+IPA_REPO = 'wm0104/wm0104.ipa'
+IPA_FOLDER = 'surge'
+ICON_REPO = 'wm0104/wm0104.icon'
+ICON_FOLDER = 'APP'
+HTML_FILE = './repo-page/index.html'
+MARKER = '<!-- AUTO_INSERT_HERE -->'
+
+with open(HTML_FILE, 'r', encoding='utf-8') as f:
+    html_content = f.read()
+
+if MARKER not in html_content:
+    print('错误：找不到标记，请检查 index.html')
+    exit(1)
+
+apps_html = ''
+for filename in os.listdir(IPA_FOLDER):
+    if filename.endswith('.ipa') or filename.endswith('.tipa'):
+        base_name = os.path.splitext(filename)[0]
+        parts = base_name.rsplit('-', 1)
+        app_name = parts[0].strip() if len(parts) > 1 else base_name
+        version = parts[1].strip() if len(parts) > 1 else 'v1.0'
+        file_type = 'ipa' if filename.endswith('.ipa') else 'tipa'
+        
+        icon_url = f'https://raw.githubusercontent.com/{ICON_REPO}/main/{ICON_FOLDER}/{app_name}.png'
+        safe_filename = urllib.parse.quote(filename)
+        download_url = f'https://raw.githubusercontent.com/{IPA_REPO}/main/{IPA_FOLDER}/{safe_filename}'
+        
+        apps_html += f'''
+            <div class="app-item">
+                <div class="app-meta-box">
+                    <a href="{icon_url}" target="_blank" class="app-icon-link">
+                        <img src="{icon_url}" class="app-icon" alt="Icon">
+                    </a>
+                    <div class="app-info">
+                        <div class="app-name">{app_name}</div>
+                        <div class="app-version">{version} · {file_type}</div>
+                        <div class="app-desc">点击下载安装</div>
+                    </div>
+                </div>
+                <a href="{download_url}" class="download-btn">下载</a>
+            </div>'''
+
+new_html = html_content.replace(MARKER, apps_html)
+with open(HTML_FILE, 'w', encoding='utf-8') as f:
+    f.write(new_html)
+print('更新完成')
