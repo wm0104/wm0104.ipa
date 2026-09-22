@@ -1,6 +1,6 @@
 import os
-import urllib.parse
 import re
+import urllib.parse
 
 IPA_FOLDER = './tipa'
 REPO = 'wm0104/wm0104.ipa'
@@ -11,8 +11,7 @@ with open(HTML_FILE, 'r', encoding='utf-8') as f:
     html = f.read()
 
 if MARKER not in html:
-    print('Error: 找不到标记')
-    exit(1)
+    raise SystemExit(f"未找到标记 {MARKER!r}，请在 {HTML_FILE} 中添加该标记")
 
 cards = ''
 
@@ -23,7 +22,6 @@ for fn in sorted(os.listdir(IPA_FOLDER)):
     base = os.path.splitext(fn)[0]
 
     match = re.match(r'^(.*?)[\s._-]?v?(\d+(?:\.\d+)+)$', base, re.IGNORECASE)
-
     if match:
         name = match.group(1).strip()
         ver = match.group(2).strip()
@@ -32,11 +30,8 @@ for fn in sorted(os.listdir(IPA_FOLDER)):
         ver = 'v1.0'
 
     icon_name = re.sub(r'[^a-zA-Z0-9]', '', name).lower()
-
     icon_url = f'https://raw.githubusercontent.com/{REPO}/main/icon/{icon_name}.png'
-
     safe_name = urllib.parse.quote(fn)
-
     down = f'https://raw.githubusercontent.com/{REPO}/main/tipa/{safe_name}'
 
     cards += f'''
