@@ -1,5 +1,4 @@
-name: Auto Update Repo Page 1
-
+name: Auto Update Repo Page 
 on:
   push:
     branches: [ main ]
